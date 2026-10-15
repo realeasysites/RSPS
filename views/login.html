@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin Login | Rubino &amp; Sons</title><meta name="robots" content="noindex">
+<style>
+body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0d2417;font-family:system-ui,sans-serif}
+form{background:#f6f0de;padding:2rem;border-radius:16px;width:min(360px,90vw);display:grid;gap:1rem;box-shadow:0 20px 40px rgba(0,0,0,.4)}
+h1{margin:0;font-size:1.4rem;color:#12301f}input{padding:.8rem;border:2px solid #d8ceb0;border-radius:10px;font-size:1rem}
+button{padding:.85rem;border:0;border-radius:999px;background:#c62828;color:#fff;font-weight:700;font-size:1rem;cursor:pointer}
+p{margin:0;color:#c62828;min-height:1.2em;font-size:.9rem}
+</style></head><body>
+<form id="f"><h1>Rubino &amp; Sons Leads</h1>
+<input type="password" id="pw" placeholder="Admin password" autofocus required>
+<button type="submit">Log in</button><p id="m"></p></form>
+<script>
+document.getElementById('f').addEventListener('submit',function(e){e.preventDefault();
+fetch('/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:document.getElementById('pw').value})})
+.then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j}})})
+.then(function(x){if(x.ok)location.href='/admin';else document.getElementById('m').textContent=x.j.error||'Login failed'});});
+</script></body></html>

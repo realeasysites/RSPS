@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Leads | Rubino &amp; Sons</title><meta name="robots" content="noindex">
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f6f0de;font-family:system-ui,sans-serif;color:#17231b}
+header{background:#12301f;color:#f6f0de;padding:1rem 1.2rem;display:flex;gap:1rem;align-items:center;flex-wrap:wrap}
+header h1{margin:0;font-size:1.2rem;flex:1}header a,header button{color:#f6f0de;background:transparent;border:1px solid rgba(246,240,222,.5);padding:.45rem .9rem;border-radius:999px;text-decoration:none;cursor:pointer;font-size:.9rem}
+main{max-width:1000px;margin:0 auto;padding:1.2rem}
+.tabs{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem}
+.tab{padding:.45rem .9rem;border-radius:999px;border:2px solid #12301f;background:#fff;cursor:pointer;font-weight:600}
+.tab.on{background:#12301f;color:#fff}
+.lead{background:#fff;border-radius:14px;padding:1rem 1.2rem;margin-bottom:.9rem;box-shadow:0 4px 14px rgba(13,36,23,.1);display:grid;gap:.5rem}
+.top{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.top b{font-size:1.1rem}.meta{color:#56635a;font-size:.88rem}
+.msg{white-space:pre-wrap;background:#faf6e8;padding:.6rem .8rem;border-radius:8px}
+select,textarea{font:inherit;padding:.5rem;border:2px solid #d8ceb0;border-radius:8px;width:100%}
+.row{display:grid;grid-template-columns:180px 1fr auto;gap:.6rem;align-items:start}
+@media(max-width:640px){.row{grid-template-columns:1fr}}
+.save{background:#c62828;color:#fff;border:0;border-radius:999px;padding:.55rem 1.1rem;font-weight:700;cursor:pointer}
+.empty{text-align:center;color:#56635a;padding:3rem 0}
+a.c{color:#1b4a2e;font-weight:600}
+</style></head><body>
+<header><h1>Rubino &amp; Sons &mdash; Quote Leads</h1><a href="/admin/api/export.csv">Export CSV</a><button id="out">Log out</button></header>
+<main><div class="tabs" id="tabs"></div><div id="list"></div></main>
+<script>
+var statuses=[],leads=[],filter='all';
+var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
+function load(){fetch('/admin/api/leads').then(function(r){if(r.status===401)location.href='/admin/login';return r.json()}).then(function(d){statuses=d.statuses;leads=d.leads;render()})}
+function render(){
+  var counts={all:leads.length};statuses.forEach(function(s){counts[s]=leads.filter(function(l){return l.status===s}).length});
+  document.getElementById('tabs').innerHTML=['all'].concat(statuses).map(function(s){return '<button class="tab'+(s===filter?' on':'')+'" data-s="'+s+'">'+s[0].toUpperCase()+s.slice(1)+' ('+counts[s]+')</button>'}).join('');
+  var rows=leads.filter(function(l){return filter==='all'||l.status===filter});
+  document.getElementById('list').innerHTML=rows.length?rows.map(function(l){return '<div class="lead" data-id="'+l.id+'"><div class="top"><b>'+esc(l.name)+'</b><span class="meta">'+esc(l.created_at)+' UTC</span></div>'
+  +'<div class="meta"><a class="c" href="tel:'+esc(l.phone)+'">'+esc(l.phone)+'</a>'+(l.email?' &bull; <a class="c" href="mailto:'+esc(l.email)+'">'+esc(l.email)+'</a>':'')+(l.town?' &bull; '+esc(l.town):'')+' &bull; '+esc(l.service)+'</div>'
+  +(l.message?'<div class="msg">'+esc(l.message)+'</div>':'')
+  +'<div class="row"><select class="st">'+statuses.map(function(s){return '<option'+(s===l.status?' selected':'')+'>'+s+'</option>'}).join('')+'</select><textarea class="nt" rows="2" placeholder="Notes">'+esc(l.notes)+'</textarea><button class="save">Save</button></div></div>'}).join(''):'<div class="empty">No leads here yet.</div>';
+}
+document.getElementById('tabs').addEventListener('click',function(e){if(e.target.dataset.s){filter=e.target.dataset.s;render()}});
+document.getElementById('list').addEventListener('click',function(e){
+  if(!e.target.classList.contains('save'))return;var card=e.target.closest('.lead');var id=card.dataset.id;
+  fetch('/admin/api/leads/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:card.querySelector('.st').value,notes:card.querySelector('.nt').value})})
+  .then(function(r){return r.json()}).then(function(u){leads=leads.map(function(l){return l.id===u.id?u:l});e.target.textContent='Saved';setTimeout(render,700)});
+});
+document.getElementById('out').onclick=function(){fetch('/admin/logout',{method:'POST'}).then(function(){location.href='/admin/login'})};
+load();
+</script></body></html>

@@ -1,0 +1,14 @@
+{
+  "name": "rubino-and-sons-site",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Rubino & Sons Property Services LLC website with lead dashboard",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": "20.x" },
+  "dependencies": {
+    "better-sqlite3": "^11.3.0",
+    "express": "^4.19.2",
+    "nodemailer": "^6.9.14"
+  }
+}
