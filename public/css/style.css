@@ -86,8 +86,9 @@ h3{font-size:1.25rem;font-weight:600}
 .note{opacity:.8;font-size:.95rem}
 
 /* gallery */
-.gallery{display:grid;grid-template-columns:repeat(2,1fr);gap:1.2rem;max-width:860px;margin:0 auto 2rem}
-.gallery figure{margin:0;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);aspect-ratio:3/4}
+.gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;max-width:1100px;margin:0 auto 2rem}
+.gallery figure{margin:0;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);aspect-ratio:3/4;position:relative}
+.gallery figcaption{position:absolute;left:0;right:0;bottom:0;padding:2.2rem 1rem .8rem;background:linear-gradient(to top,rgba(13,36,23,.85),transparent);color:#fff;font-weight:600;font-size:.95rem}
 .gallery img{width:100%;height:100%;object-fit:cover}
 
 /* reviews */
@@ -150,6 +151,8 @@ h3{font-size:1.25rem;font-weight:600}
 }
 @media(max-width:620px){
   .cards,.reviews,.form .row{grid-template-columns:1fr}
+  .gallery{grid-template-columns:1fr 1fr;gap:.7rem}
+  .gallery figcaption{font-size:.8rem;padding:1.6rem .6rem .5rem}
   .section{padding:3.5rem 0}
   .brand-text small{display:none}
   .header-cta .btn-red{display:none}
