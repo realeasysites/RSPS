@@ -25,6 +25,12 @@ router.patch('/api/leads/:id', auth.requireAuth, (req, res) => {
   res.json(updated);
 });
 
+// Delete a request that isn't a real lead (spam, test, wrong number).
+router.delete('/api/leads/:id', auth.requireAuth, (req, res) => {
+  if (!db.deleteLead(Number(req.params.id))) return res.status(404).json({ error: 'Not found' });
+  res.json({ ok: true });
+});
+
 router.get('/api/export.csv', auth.requireAuth, (_req, res) => {
   const q = (v) => `"${String(v == null ? '' : v).replace(/"/g, '""')}"`;
   const cols = ['id', 'created_at', 'status', 'name', 'phone', 'email', 'town', 'service', 'message', 'notes'];

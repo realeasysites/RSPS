@@ -18,6 +18,7 @@ select,textarea{font:inherit;padding:.5rem;border:2px solid #d8ceb0;border-radiu
 @media(max-width:640px){.row{grid-template-columns:1fr}}
 .save{background:#c62828;color:#fff;border:0;border-radius:999px;padding:.55rem 1.1rem;font-weight:700;cursor:pointer}
 .empty{text-align:center;color:#56635a;padding:3rem 0}
+.acts{text-align:right;margin-top:.6rem}.del{background:transparent;color:#b3261e;border:1px solid #e3b9b4;border-radius:999px;padding:.4rem 1rem;cursor:pointer;font:inherit;font-size:.85rem}.del:hover{border-color:#b3261e}
 a.c{color:#1b4a2e;font-weight:600}
 </style></head><body>
 <header><h1>Rubino &amp; Sons &mdash; Quote Leads</h1><a href="/admin/api/export.csv">Export CSV</a><button id="out">Log out</button></header>
@@ -33,10 +34,12 @@ function render(){
   document.getElementById('list').innerHTML=rows.length?rows.map(function(l){return '<div class="lead" data-id="'+l.id+'"><div class="top"><b>'+esc(l.name)+'</b><span class="meta">'+esc(l.created_at)+' UTC</span></div>'
   +'<div class="meta"><a class="c" href="tel:'+esc(l.phone)+'">'+esc(l.phone)+'</a>'+(l.email?' &bull; <a class="c" href="mailto:'+esc(l.email)+'">'+esc(l.email)+'</a>':'')+(l.town?' &bull; '+esc(l.town):'')+' &bull; '+esc(l.service)+'</div>'
   +(l.message?'<div class="msg">'+esc(l.message)+'</div>':'')
-  +'<div class="row"><select class="st">'+statuses.map(function(s){return '<option'+(s===l.status?' selected':'')+'>'+s+'</option>'}).join('')+'</select><textarea class="nt" rows="2" placeholder="Notes">'+esc(l.notes)+'</textarea><button class="save">Save</button></div></div>'}).join(''):'<div class="empty">No leads here yet.</div>';
+  +'<div class="row"><select class="st">'+statuses.map(function(s){return '<option'+(s===l.status?' selected':'')+'>'+s+'</option>'}).join('')+'</select><textarea class="nt" rows="2" placeholder="Notes">'+esc(l.notes)+'</textarea><button class="save">Save</button></div><div class="acts"><button class="del">Delete</button></div></div>'}).join(''):'<div class="empty">No leads here yet.</div>';
 }
 document.getElementById('tabs').addEventListener('click',function(e){if(e.target.dataset.s){filter=e.target.dataset.s;render()}});
 document.getElementById('list').addEventListener('click',function(e){
+  if(e.target.classList.contains('del')){var c=e.target.closest('.lead');if(!confirm('Delete this request? This cannot be undone.'))return;
+    fetch('/admin/api/leads/'+c.dataset.id,{method:'DELETE'}).then(function(r){if(!r.ok)throw 0;leads=leads.filter(function(l){return String(l.id)!==c.dataset.id});render()}).catch(function(){alert('Could not delete. Try again.')});return}
   if(!e.target.classList.contains('save'))return;var card=e.target.closest('.lead');var id=card.dataset.id;
   fetch('/admin/api/leads/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:card.querySelector('.st').value,notes:card.querySelector('.nt').value})})
   .then(function(r){return r.json()}).then(function(u){leads=leads.map(function(l){return l.id===u.id?u:l});e.target.textContent='Saved';setTimeout(render,700)});

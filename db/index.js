@@ -40,5 +40,6 @@ module.exports = {
     db.prepare('UPDATE leads SET status = ?, notes = ? WHERE id = ?').run(s, n, id);
     return db.prepare('SELECT * FROM leads WHERE id = ?').get(id);
   },
+  deleteLead(id) { return db.prepare('DELETE FROM leads WHERE id = ?').run(id).changes > 0; },
   countLeads() { return db.prepare('SELECT COUNT(*) c FROM leads').get().c; }
 };
